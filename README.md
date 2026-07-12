@@ -60,6 +60,31 @@ All methods return a `ScoringProgramResponse` (poll methods return lists of DTOs
 on communication problems: inspect `dataType`/`errorType` on the response, exactly like with the
 .NET client. Methods are synchronous; one request is in flight at a time per client instance.
 
+## Getting started sample
+
+[examples/](examples/) contains a small console application that exercises the whole workflow
+against a live Data Connector — use it as a template for your own scoring program:
+
+```
+mvnw install -DskipTests                  # put the library in your local Maven repository once
+cd examples
+..\mvnw compile exec:java                 # or run/debug GettingStarted from your IDE
+```
+
+Mind that **"Initialize event" starts Bridgemate Control Software** and creates a small test
+event (1 section, 2 tables, 3 rounds, 8 players). The poll queues only carry data once BCS
+produces it: enter a result in BCS (or on a Bridgemate) and then poll for results here. The
+sample prints every request and response envelope (wire trace, toggleable), which is the fastest
+way to learn the protocol.
+
+### Debugging in Visual Studio Code
+
+Open this folder in VS Code with a JDK 11+ installed and accept the recommended
+"Extension Pack for Java". Run the default build task once (installs the library into your local
+Maven repository), then press <kbd>F5</kbd> — launch configurations for the sample are provided
+in `.vscode/launch.json`. Set a breakpoint in `DataConnectorClient.sendRequest()` to watch every
+envelope being built and sent.
+
 ## Documentation
 
 The protocol, the procedures (initializing an event, updating movements, the queues) and all DTOs

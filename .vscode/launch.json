@@ -1,0 +1,24 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Getting started (interactive)",
+            "type": "java",
+            "request": "launch",
+            "mainClass": "nl.bridgemate.dataconnector.examples.GettingStarted",
+            "projectName": "bridgemate-dataconnector-getting-started",
+            "cwd": "${workspaceFolder}/examples",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Getting started (--scenario)",
+            "type": "java",
+            "request": "launch",
+            "mainClass": "nl.bridgemate.dataconnector.examples.GettingStarted",
+            "projectName": "bridgemate-dataconnector-getting-started",
+            "args": ["--scenario"],
+            "cwd": "${workspaceFolder}/examples",
+            "console": "integratedTerminal"
+        }
+    ]
+}

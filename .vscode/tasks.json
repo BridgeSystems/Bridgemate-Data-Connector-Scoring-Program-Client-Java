@@ -1,0 +1,21 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "install library to local repo",
+            "type": "shell",
+            "command": "./mvnw install -DskipTests",
+            "windows": { "command": ".\\mvnw.cmd install -DskipTests" },
+            "problemMatcher": [],
+            "group": { "kind": "build", "isDefault": true }
+        },
+        {
+            "label": "run tests",
+            "type": "shell",
+            "command": "./mvnw test",
+            "windows": { "command": ".\\mvnw.cmd test" },
+            "problemMatcher": [],
+            "group": "test"
+        }
+    ]
+}
