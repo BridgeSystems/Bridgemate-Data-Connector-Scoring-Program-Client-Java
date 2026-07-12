@@ -1,0 +1,56 @@
+name: Release to Maven Central
+
+# One-time setup required before this workflow can run (see README of the Central Portal):
+#  1. Create an account on https://central.sonatype.com and verify the nl.bridgemate namespace
+#     with a DNS TXT record on bridgemate.nl.
+#  2. Generate a portal token and store it as the CENTRAL_USERNAME / CENTRAL_TOKEN secrets.
+#  3. Generate a GPG key pair, publish the public key to keys.openpgp.org, and store the private
+#     key (ascii-armored) as GPG_PRIVATE_KEY and its passphrase as GPG_PASSPHRASE.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (semver, without the v prefix), e.g. 1.0.0'
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+          cache: maven
+          server-id: central
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: GPG_PASSPHRASE
+
+      - name: Set release version
+        run: mvn --batch-mode versions:set -DnewVersion=${{ inputs.version }} -DgenerateBackupPoms=false
+
+      - name: Test
+        run: mvn --batch-mode test
+
+      - name: Publish to Maven Central
+        run: mvn --batch-mode -P release -DskipTests deploy
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          MAVEN_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN }}
+
+      - name: Create tag and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ inputs.version }}" \
+            --target "${{ github.sha }}" \
+            --title "v${{ inputs.version }}" \
+            --generate-notes
