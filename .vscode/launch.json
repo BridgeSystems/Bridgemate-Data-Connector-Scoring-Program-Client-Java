@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Getting started (interactive)",
+            "name": "Java: getting started (interactive)",
             "type": "java",
             "request": "launch",
             "mainClass": "nl.bridgemate.dataconnector.examples.GettingStarted",
@@ -11,7 +11,7 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Getting started (--scenario)",
+            "name": "Java: getting started (--scenario)",
             "type": "java",
             "request": "launch",
             "mainClass": "nl.bridgemate.dataconnector.examples.GettingStarted",
