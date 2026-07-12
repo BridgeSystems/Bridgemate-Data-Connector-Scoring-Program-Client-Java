@@ -111,7 +111,9 @@ public final class GettingStarted {
     private ScoringProgramResponse continueEvent() {
         ContinueDTO continueDto = new ContinueDTO();
         continueDto.eventGuid = state().get("eventGuid");
-        continueDto.commands = 7;
+        //Unlike InitDTO, ContinueDTO must not carry the Reset flag (2): only start BCS (1),
+        //start reading (4) and optionally clear data (128), minimize, auto-shutdown or debug logging.
+        continueDto.commands = 5;
         return client.continueEvent(continueDto);
     }
 
@@ -259,10 +261,31 @@ public final class GettingStarted {
     //--------------------------------------------------------------------------------------------
 
     private static void report(String action, ScoringProgramResponse response) {
-        String data = response.serializedData != null && response.serializedData.length() > 120
-                ? response.serializedData.substring(0, 120)
-                : response.serializedData;
-        System.out.printf("%s -> DataType=%s ErrorType=%s Data=%s%n", action, response.dataType, response.errorType, data);
+        System.out.printf("%s -> DataType=%s ErrorType=%s%n", action, response.dataType, response.errorType);
+        System.out.println(indent(prettyData(response.serializedData)));
+    }
+
+    /**
+     * Renders the (JSON string) payload of a response in full, pretty-printed. \r\n sequences
+     * inside message strings become real line breaks so validation messages read naturally.
+     */
+    private static String prettyData(String serializedData) {
+        if (serializedData == null || serializedData.trim().isEmpty()) {
+            return "(no data)";
+        }
+        try {
+            Object decoded = MAPPER.readValue(serializedData, Object.class);
+            if (decoded instanceof String) {
+                return ((String) decoded).replace("\r\n", "\n").replace("\r", "\n");
+            }
+            return MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(decoded);
+        } catch (IOException e) {
+            return serializedData;
+        }
+    }
+
+    private static String indent(String text) {
+        return "  " + text.replace("\n", "\n  ");
     }
 
     private static String newGuid() {
