@@ -121,8 +121,9 @@ mvn test
 
 The same client exists for
 [.NET](https://github.com/BridgeSystems/Bridgemate-Data-Connector-Scoring-Program-Client) (the
-reference implementation, including the scoring program emulator) and
-[PHP](https://github.com/BridgeSystems/Bridgemate-Data-Connector-Scoring-Program-Client-PHP).
+reference implementation, including the scoring program emulator),
+[PHP](https://github.com/BridgeSystems/Bridgemate-Data-Connector-Scoring-Program-Client-PHP) and
+[Python](https://github.com/BridgeSystems/Bridgemate-Data-Connector-Scoring-Program-Client-Python).
 Questions are welcome in the
 [Discussions](https://github.com/BridgeSystems/Bridgemate-Data-Connector-Scoring-Program-Client/discussions)
 of the main repository; see [SUPPORT.md](SUPPORT.md).
