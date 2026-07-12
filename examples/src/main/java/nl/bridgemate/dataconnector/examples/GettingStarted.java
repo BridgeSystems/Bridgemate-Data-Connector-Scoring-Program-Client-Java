@@ -53,6 +53,10 @@ public final class GettingStarted {
     }
 
     public static void main(String[] args) {
+        System.out.println("=== Bridgemate Data Connector getting-started sample - Java client ===");
+        System.out.println("Running on Java " + System.getProperty("java.version")
+                + " (" + System.getProperty("java.vendor") + ", " + System.getProperty("os.name") + ")");
+
         String baseAddress = optionValue(args, "--base-address");
         String clubId = optionValue(args, "--club-id");
         String licenceKey = optionValue(args, "--licence-key");
