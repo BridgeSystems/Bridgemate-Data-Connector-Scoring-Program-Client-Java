@@ -170,12 +170,14 @@ public final class GettingStarted {
                 items = List.of();
         }
         System.out.println("Polled " + dataType + ": " + items.size() + " item(s)");
+        int index = 0;
         for (Object item : items) {
-            System.out.println("  " + writeJson(item));
+            System.out.println("  #" + (++index));
+            System.out.println(indent(indent(prettyJson(item))));
         }
         if (!items.isEmpty()) {
             System.out.println("Last queue item id: " + client.getLastQueueItemId(dataType)
-                    + " — use 'accept' so they are not sent again.");
+                    + " - use 'accept' so they are not sent again.");
         }
     }
 
@@ -281,6 +283,14 @@ public final class GettingStarted {
             return MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(decoded);
         } catch (IOException e) {
             return serializedData;
+        }
+    }
+
+    private static String prettyJson(Object value) {
+        try {
+            return MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(value);
+        } catch (IOException e) {
+            return writeJson(value);
         }
     }
 
