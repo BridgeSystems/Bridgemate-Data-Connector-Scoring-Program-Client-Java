@@ -117,6 +117,16 @@ structural JSON equality with the exact bytes the .NET client produces.
 mvn test
 ```
 
+## Other platforms and support
+
+The same client exists for
+[.NET](https://github.com/BridgeSystems/Bridgemate-Data-Connector-Scoring-Program-Client) (the
+reference implementation, including the scoring program emulator) and
+[PHP](https://github.com/BridgeSystems/Bridgemate-Data-Connector-Scoring-Program-Client-PHP).
+Questions are welcome in the
+[Discussions](https://github.com/BridgeSystems/Bridgemate-Data-Connector-Scoring-Program-Client/discussions)
+of the main repository; see [SUPPORT.md](SUPPORT.md).
+
 ## License
 
 LGPL-3.0-only, like the .NET client.
