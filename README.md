@@ -62,13 +62,13 @@ on communication problems: inspect `dataType`/`errorType` on the response, exact
 
 ## Getting started sample
 
-[examples/](examples/) contains a small console application that exercises the whole workflow
-against a live Data Connector — use it as a template for your own scoring program:
+[GettingStarted.java](src/test/java/nl/bridgemate/dataconnector/examples/GettingStarted.java)
+(test scope, so it stays out of the published jar) is a small console application that exercises
+the whole workflow against a live Data Connector — use it as a template for your own scoring
+program:
 
 ```
-mvnw install -DskipTests                  # put the library in your local Maven repository once
-cd examples
-..\mvnw compile exec:java                 # or run/debug GettingStarted from your IDE
+mvnw test-compile exec:java               # or run/debug GettingStarted from your IDE
 ```
 
 Mind that **"Initialize event" starts Bridgemate Control Software** and creates a small test
@@ -79,14 +79,11 @@ way to learn the protocol.
 
 ### Debugging in Visual Studio Code
 
-Open **`bridgemate-dataconnector-client-java.code-workspace`** in VS Code (File → Open Workspace
-from File…) with a JDK 11+ installed and accept the recommended "Extension Pack for Java". The
-workspace file adds `examples/` as its own folder — required, because the Java language server
-only imports the root `pom.xml` of each workspace folder, and the example is deliberately a
-standalone Maven module. Run the default build task once (installs the library into your local
-Maven repository), then press <kbd>F5</kbd> with "Java: getting started (interactive)" selected.
-Set a breakpoint in `DataConnectorClient.sendRequest()` to watch every envelope being built and
-sent.
+Open this folder in VS Code with a JDK 11+ installed and accept the recommended
+"Extension Pack for Java". After the Java language server finishes importing the Maven project,
+press <kbd>F5</kbd> with "Java: getting started (interactive)" selected — launch configurations
+are provided in `.vscode/launch.json`. Set a breakpoint in `DataConnectorClient.sendRequest()`
+to watch every envelope being built and sent.
 
 ## Documentation
 

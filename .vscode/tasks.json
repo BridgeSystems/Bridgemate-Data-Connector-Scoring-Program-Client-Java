@@ -2,10 +2,10 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "install library to local repo",
+            "label": "build (test-compile)",
             "type": "shell",
-            "command": "./mvnw install -DskipTests",
-            "windows": { "command": ".\\mvnw.cmd install -DskipTests" },
+            "command": "./mvnw test-compile",
+            "windows": { "command": ".\\mvnw.cmd test-compile" },
             "problemMatcher": [],
             "group": { "kind": "build", "isDefault": true }
         },

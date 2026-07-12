@@ -6,8 +6,8 @@
             "type": "java",
             "request": "launch",
             "mainClass": "nl.bridgemate.dataconnector.examples.GettingStarted",
-            "projectName": "bridgemate-dataconnector-getting-started",
-            "cwd": "${workspaceFolder}/examples",
+            "projectName": "bridgemate-dataconnector-client",
+            "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"
         },
         {
@@ -15,9 +15,9 @@
             "type": "java",
             "request": "launch",
             "mainClass": "nl.bridgemate.dataconnector.examples.GettingStarted",
-            "projectName": "bridgemate-dataconnector-getting-started",
+            "projectName": "bridgemate-dataconnector-client",
             "args": ["--scenario"],
-            "cwd": "${workspaceFolder}/examples",
+            "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"
         }
     ]

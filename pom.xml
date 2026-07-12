@@ -66,6 +66,16 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
       </plugin>
+      <!-- Runs the getting-started sample (test scope): mvnw test-compile exec:java -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.2.0</version>
+        <configuration>
+          <mainClass>nl.bridgemate.dataconnector.examples.GettingStarted</mainClass>
+          <classpathScope>test</classpathScope>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
