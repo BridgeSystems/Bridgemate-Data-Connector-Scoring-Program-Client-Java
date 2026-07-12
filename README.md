@@ -79,11 +79,14 @@ way to learn the protocol.
 
 ### Debugging in Visual Studio Code
 
-Open this folder in VS Code with a JDK 11+ installed and accept the recommended
-"Extension Pack for Java". Run the default build task once (installs the library into your local
-Maven repository), then press <kbd>F5</kbd> — launch configurations for the sample are provided
-in `.vscode/launch.json`. Set a breakpoint in `DataConnectorClient.sendRequest()` to watch every
-envelope being built and sent.
+Open **`bridgemate-dataconnector-client-java.code-workspace`** in VS Code (File → Open Workspace
+from File…) with a JDK 11+ installed and accept the recommended "Extension Pack for Java". The
+workspace file adds `examples/` as its own folder — required, because the Java language server
+only imports the root `pom.xml` of each workspace folder, and the example is deliberately a
+standalone Maven module. Run the default build task once (installs the library into your local
+Maven repository), then press <kbd>F5</kbd> with "Java: getting started (interactive)" selected.
+Set a breakpoint in `DataConnectorClient.sendRequest()` to watch every envelope being built and
+sent.
 
 ## Documentation
 
