@@ -22,7 +22,13 @@ public final class JavaNetHttpTransport implements HttpTransport {
     }
 
     public JavaNetHttpTransport(Duration connectTimeout, Duration requestTimeout) {
-        this.client = HttpClient.newBuilder().connectTimeout(connectTimeout).build();
+        // The data connector lives on localhost or the LAN: NO_PROXY guarantees a proxy configured
+        // via JVM system properties (http.proxyHost, java.net.useSystemProxies) never hijacks the
+        // request (503 from a corporate proxy without a localhost bypass).
+        this.client = HttpClient.newBuilder()
+                .connectTimeout(connectTimeout)
+                .proxy(HttpClient.Builder.NO_PROXY)
+                .build();
         this.requestTimeout = requestTimeout;
     }
 
