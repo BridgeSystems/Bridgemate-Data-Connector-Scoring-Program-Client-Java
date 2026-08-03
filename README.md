@@ -88,6 +88,24 @@ press <kbd>F5</kbd> with "Java: getting started (interactive)" selected — laun
 are provided in `.vscode/launch.json`. Set a breakpoint in `DataConnectorClient.sendRequest()`
 to watch every envelope being built and sent.
 
+## Validation
+
+The DTOs can be validated before they are sent: `DtoValidator.validate(dto)` (with an extra
+argument for `ParticipationDTO` and `SessionDTO`) fills the DTO's `validationMessages` and
+returns whether the DTO is valid. Validating client-side is advisory — it catches problems
+before a round trip — but the Data Connector service re-validates authoritatively and rejects
+invalid data with `ErrorType.Validation`, so a client must still handle that response.
+
+Sections created with `HasExplicitParticipations` carry the complete seating for every round as
+`ParticipationDTO`s with their `RoundNumber` set; for all other sections participations may only
+carry round number zero or one (the first-round seating) and BCS calculates the remaining rounds
+from the movement.
+
+Unlike the `dto` package, the validators in `nl.bridgemate.dataconnector.validation` are
+hand-written ports of the .NET client's `Validate()` methods, kept in parity by generated golden
+fixtures (`src/test/resources/fixtures/validation`) that assert the exact boolean result and
+message texts, in order, for every rule.
+
 ## Documentation
 
 The protocol, the procedures (initializing an event, updating movements, the queues) and all DTOs
