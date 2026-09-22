@@ -96,6 +96,18 @@ public final class DtoValidator {
         if (dto.roundNumber < 0) {
             messages.add("Invalid RoundNumber (" + dto.roundNumber + "). The value cannot be negative.");
         }
+        if (dto.isRemoval) {
+            // A removal empties the seat, so it carries no player at all.
+            if (!isNullOrWhiteSpace(dto.playerNumber) || !isNullOrWhiteSpace(dto.firstName)
+                    || !isNullOrWhiteSpace(dto.lastName) || !isNullOrWhiteSpace(dto.countryCode)) {
+                messages.add("A removal (IsRemoval) must not specify a PlayerNumber, FirstName, LastName or CountryCode.");
+            }
+            if (dto.isPlayerSwap) {
+                messages.add("A participation cannot be both a removal (IsRemoval) and a player swap (IsPlayerSwap).");
+            }
+            dto.validationMessages = messages.toArray(new String[0]);
+            return messages.isEmpty();
+        }
         if (isNullOrWhiteSpace(dto.lastName) && isNullOrWhiteSpace(dto.playerNumber)) {
             messages.add("Either the LastName or the PlayerNumber must be specified.");
         }
@@ -111,6 +123,9 @@ public final class DtoValidator {
      * interpolate as empty). It is embedded in InitDTO and SectionUpdateDTO messages.
      */
     private static String participationToString(ParticipationDTO dto) {
+        if (dto.isRemoval) {
+            return "REMOVE " + nz(dto.sectionLetters) + dto.tableNumber + " " + direction(dto).name() + " round " + dto.roundNumber;
+        }
         return (dto.isPlayerSwap ? "SWAP " : "") + nz(dto.sectionLetters) + dto.tableNumber
                 + " " + direction(dto).name() + " round " + dto.roundNumber
                 + ": " + nz(dto.playerNumber) + " " + nz(dto.firstName) + " " + nz(dto.lastName);
