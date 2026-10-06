@@ -22,6 +22,7 @@ import nl.bridgemate.dataconnector.dto.TdCallDTO;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,6 +31,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.LongPredicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -63,8 +65,20 @@ public class DataConnectorClient {
      */
     public static final String API_PING_RESPONSE = "Bridgemate dataconnector service version";
 
+    /**
+     * The registry key where the Data Connector service of the current Windows user publishes its http
+     * port (value HttpPort) and its own process id (value HttpProcessId).
+     */
+    public static final String PUBLICATION_REGISTRY_KEY = "HKCU\\Software\\Bridge Systems BV\\BridgemateDataConnector";
+
+    /**
+     * The process name of the Data Connector service (its executable without the extension).
+     */
+    public static final String DATA_CONNECTOR_PROCESS_NAME = "BridgeSystems.Bridgemate.DataConnectorService";
+
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final Pattern REG_HTTP_PORT = Pattern.compile("HttpPort\\s+REG_DWORD\\s+0x([0-9A-Fa-f]+)");
+    private static final Pattern REG_HTTP_PROCESS_ID = Pattern.compile("HttpProcessId\\s+REG_DWORD\\s+0x([0-9A-Fa-f]+)");
 
     private final String clubId;
     private final String licenceKey;
@@ -120,15 +134,14 @@ public class DataConnectorClient {
     /**
      * The url of the Data Connector on the local computer. On Windows the Data Connector service
      * publishes the port it listens on in the registry (HKEY_CURRENT_USER\Software\Bridge Systems BV\
-     * BridgemateDataConnector, value HttpPort); when nothing is published the default port 5079 is
-     * assumed.
+     * BridgemateDataConnector, value HttpPort); when nothing is published, or the Data Connector that
+     * published it no longer runs, the default port 5079 is assumed.
      */
     public static String discoverLocalBaseAddress() {
         String os = System.getProperty("os.name", "");
         if (os.toLowerCase().contains("windows")) {
             try {
-                Process process = new ProcessBuilder(
-                        "reg", "query", "HKCU\\Software\\Bridge Systems BV\\BridgemateDataConnector", "/v", "HttpPort")
+                Process process = new ProcessBuilder("reg", "query", PUBLICATION_REGISTRY_KEY)
                         .redirectErrorStream(true)
                         .start();
                 String output;
@@ -137,12 +150,9 @@ public class DataConnectorClient {
                     output = reader.lines().collect(Collectors.joining("\n"));
                 }
                 process.waitFor();
-                Matcher matcher = REG_HTTP_PORT.matcher(output);
-                if (matcher.find()) {
-                    int port = Integer.parseInt(matcher.group(1), 16);
-                    if (port > 0 && port <= 65535) {
-                        return "http://localhost:" + port;
-                    }
+                Integer port = publishedPort(output, DataConnectorClient::isDataConnectorRunning);
+                if (port != null) {
+                    return "http://localhost:" + port;
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -151,6 +161,43 @@ public class DataConnectorClient {
             }
         }
         return "http://localhost:" + DEFAULT_PORT;
+    }
+
+    /**
+     * The port published in the output of "reg query" on the publication key, or null when none is
+     * published or the Data Connector that published it (value HttpProcessId) no longer runs: a Data
+     * Connector that was killed, for instance by the Data Connector of an old installation, leaves its
+     * values behind. Values without a process id come from Data Connectors that predate it; they are
+     * trusted.
+     *
+     * @param isRunning tells whether the Data Connector with the given process id runs.
+     */
+    static Integer publishedPort(String regQueryOutput, LongPredicate isRunning) {
+        Matcher portMatcher = REG_HTTP_PORT.matcher(regQueryOutput);
+        if (!portMatcher.find()) {
+            return null;
+        }
+        int port = Integer.parseInt(portMatcher.group(1), 16);
+        if (port <= 0 || port > 65535) {
+            return null;
+        }
+        Matcher processIdMatcher = REG_HTTP_PROCESS_ID.matcher(regQueryOutput);
+        if (processIdMatcher.find() && !isRunning.test(Long.parseLong(processIdMatcher.group(1), 16))) {
+            return null;
+        }
+        return port;
+    }
+
+    private static boolean isDataConnectorRunning(long processId) {
+        return ProcessHandle.of(processId)
+                .filter(ProcessHandle::isAlive)
+                //Checking the executable also guards against the process id having been reused by an
+                //unrelated process. When the executable cannot be read, trust the publication, as before.
+                .map(handle -> handle.info().command()
+                        .map(command -> Paths.get(command).getFileName().toString()
+                                .equalsIgnoreCase(DATA_CONNECTOR_PROCESS_NAME + ".exe"))
+                        .orElse(true))
+                .orElse(false);
     }
 
     /**

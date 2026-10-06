@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -131,6 +132,46 @@ class DataConnectorClientTest {
     void invalidBaseAddressIsRejected() {
         assertThrows(IllegalArgumentException.class,
                 () -> new DataConnectorClient("c", "l", "ftp://example.com"));
+    }
+
+    private static final String REG_QUERY_HEADER =
+            "\nHKEY_CURRENT_USER\\Software\\Bridge Systems BV\\BridgemateDataConnector\n";
+
+    @Test
+    void publishedPortWithoutProcessIdIsTrusted() {
+        String output = REG_QUERY_HEADER
+                + "    HttpPort    REG_DWORD    0x13d8\n"
+                + "    HttpBinding    REG_SZ    local\n";
+        Integer port = DataConnectorClient.publishedPort(output, processId -> {
+            throw new AssertionError("Not expected to be asked.");
+        });
+        assertEquals(5080, port);
+    }
+
+    @Test
+    void publishedPortOfARunningDataConnectorIsUsed() {
+        String output = REG_QUERY_HEADER
+                + "    HttpPort    REG_DWORD    0x13d8\n"
+                + "    HttpBinding    REG_SZ    local\n"
+                + "    HttpProcessId    REG_DWORD    0x3e8\n";
+        List<Long> asked = new ArrayList<>();
+        Integer port = DataConnectorClient.publishedPort(output, processId -> asked.add(processId));
+        assertEquals(5080, port);
+        assertEquals(List.of(1000L), asked);
+    }
+
+    @Test
+    void publishedPortOfADataConnectorThatNoLongerRunsIsIgnored() {
+        String output = REG_QUERY_HEADER
+                + "    HttpPort    REG_DWORD    0x13d8\n"
+                + "    HttpProcessId    REG_DWORD    0x3e8\n";
+        assertNull(DataConnectorClient.publishedPort(output, processId -> false));
+    }
+
+    @Test
+    void onlyAPortPreferenceIsNotAPublishedPort() {
+        String output = REG_QUERY_HEADER + "    HttpPortPreference    REG_DWORD    0x13d7\n";
+        assertNull(DataConnectorClient.publishedPort(output, processId -> true));
     }
 
     private static String fixture(String relativePath) throws IOException {
